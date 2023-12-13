@@ -74,7 +74,7 @@ class Package(UniversalIdModel, TimeStampedModel):
         verbose_name_plural = "Packages"
 
     def __str__(self):
-        return f"{self.user.username}'s {self.category.name} Package"
+        return self.category.name
 
 
 class Deposit(UniversalIdModel, TimeStampedModel):

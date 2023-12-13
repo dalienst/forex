@@ -56,14 +56,28 @@
         <div class="container-fluid h-100 mx-0 my-0 px-0 py-0">
             <div class="container">
                 {% if messages %}
-                <div>
+                <div id="message-toast" class="position-fixed top-0 end-0 p-3 mt-5" style="z-index: 5">
                     {% for message in messages %}
-                    <div
-                        class="p-3 mt-3 mb-3 rounded {% if message.tags == 'error' %}bg-danger text-white{% else %}bg-success text-white{% endif %}">
-                        {{ message }}
-                    </div>
+                        <div class="toast show {% if message.tags == 'error' %}bg-danger{% else %}bg-success{% endif %}" role="alert" aria-live="assertive" aria-atomic="true">
+                            <div class="toast-header">
+                                <strong class="me-auto">Notification</strong>
+                                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                            </div>
+                            <div class="toast-body">
+                                {{ message }}
+                            </div>
+                        </div>
                     {% endfor %}
                 </div>
+
+                <script>
+                    var toastElList = [].slice.call(document.querySelectorAll('.toast'))
+                    var toastList = toastElList.map(function (toastEl) {
+                        return new bootstrap.Toast(toastEl)
+                    });
+
+                    toastList.forEach(toast => toast.show());
+                </script>
                 {% endif %}
             </div>
             {% block content %}

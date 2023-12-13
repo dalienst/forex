@@ -80,10 +80,13 @@ class InvestCategoryUpdateView(
     def test_func(self) -> bool | None:
         return self.request.user.is_superuser
 
+
 """
 Views specifically for packages start here
 Subscribing for packages
 """
+
+
 @login_required
 def portfolio(request):
     paymentmethods = PaymentMethod.objects.all()
@@ -102,6 +105,11 @@ class PackageCreateView(SuccessMessageMixin, LoginRequiredMixin, CreateView):
     success_message = "Successfully Subscribed to The Package"
     success_url = reverse_lazy("investments:portfolio")
 
+    def form_valid(self, form):
+        # Set the user field to the currently logged-in user
+        form.instance.user = self.request.user
+        return super().form_valid(form)
+
 
 class PackageListView(LoginRequiredMixin, ListView):
     template_name = "package_list.html"
@@ -112,6 +120,9 @@ class PackageListView(LoginRequiredMixin, ListView):
 
 class PackageDetailView(LoginRequiredMixin, DetailView):
     template_name = "package_detail.html"
+    context_object_name = "package_detail"
 
     def get_queryset(self) -> QuerySet[Any]:
         return Package.objects.filter(user=self.request.user)
+
+# create a delete method that deletes the package after 7 days or moves to trash model

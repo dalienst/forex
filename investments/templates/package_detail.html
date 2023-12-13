@@ -2,10 +2,19 @@
 
 {% load static %}
 
-{% block title %}{{package.name}}{% endblock %}
+{% block title %}{{package_detail}}{% endblock %}
 
 {% block content %}
 
+<div class="container-fluid m-0 p-0">
+    <div class="h-75 p-5 dash " style="background-color: #123c66;">
+        <div class="text-center text-white">
 
+            <h4 class="fw-bold"><a href="{% url 'investments:portfolio' %}"
+                    class="text-decoration-none text-white">Portfolio</a> > {{package_detail}}</h4>
+            <p class="fw-semibold">Subscription ID: {{package_detail.id}}</p>
+        </div>
+    </div>
+</div>
 
 {% endblock %}
