@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %}Portfolio{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid m-0 p-0">
+    <div class="h-75 p-5 dash " style="background-color: #123c66;">
+        <div class="text-center text-white">
+    
+            <h3 class="fw-bold">Your Portfolio</h3>
+        </div>
+    </div>
+</div>
+
+{% if user_packages %}
+hello
+{% else %}
+<div class="container py-5 mt-3 mb-5">
+    <p class="bg-warning border border-dark p-3 rounded">
+        You have not subscribed to any of our packages. Create a subscription <a href="{% url 'investments:package-create' %}">here</a>
+    </p>
+</div>
+{% endif %}
+
+{% endblock %}

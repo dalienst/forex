@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Sign Up{% endblock %}
+
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="container">
+    <h2 class="text-center">Sign up</h2>
+    <div class="col-md-10 mx-auto col-lg-5">
+        <form method="post" class="p-4 border rounded-3 bg-body-tertiary">
+            {% csrf_token %}
+            <div class="form-floating mb-3">
+                {{ form.first_name|as_crispy_field }}
+            </div>
+            <div class="form-floating mb-3">
+                {{ form.last_name|as_crispy_field }}
+            </div>
+            <div class="form-floating mb-3">
+                {{ form.username|as_crispy_field }}
+            </div>
+            <div class="form-floating mb-3">
+                {{ form.email|as_crispy_field }}
+            </div>
+            <div class="form-floating mb-3">
+                {{ form.password1|as_crispy_field }}
+            </div>
+            <div class="form-floating mb-3">
+                {{ form.password2|as_crispy_field }}
+            </div>
+            <button class="btn btn-primary" type="submit">Sign Up</button>
+            <div class="form-floating mb-3 mt-3">
+                <a href="{% url 'login' %}">Already have an account? Log in</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

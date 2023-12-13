@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %}Investment Plans{% endblock %}
+
+{% block content %}
+<div class="container-fluid m-0 p-0">
+    <div class="h-75 p-5 dash " style="background-color: #123c66;">
+        <div class="text-center text-white">
+            <h1 class="fw-bold">Our Investment Packages</h1>
+        </div>
+    </div>
+
+    <div class="container py-5">
+        <section class="mt-3">
+            <div class="row mb-3">
+        
+                {% for category in investcategory_list %}
+                <div class="col mb-3">
+                    <div class="card h-100">
+                        <div class="card-header fw-bold text-white mynav">
+                            {{category.name}}
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text">
+                                {{category.description}}
+                            </p>
+                        </div>
+                        <div class="card-footer">
+                            <a href="{% url 'investments:investment-detail' category.pk %}" class="btn mynav text-white fw-bold btn-sm w-100">More Details</a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+    {% if user.is_client %}
+
+    <div class="dash border-bottom p-5 rounded-5 rounded-top-0 h-50 px-3 herobg">
+        <div class="text-center text-white">
+            <h3 class="fw-bold">
+                Welcome {{user.first_name}}
+            </h3>
+        </div>
+    </div>
+
+    <section id="assets" class="py-3 mt-3 container">
+        <div class="row mb-3">
+
+            <div class="col">
+                <div class="card mb-3">
+                    <div class="card-header chart text-white">
+                        Investment Balance
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">Crypto: 0USDT</p>
+                        <p class="card-text">Ksh: 0Ksh</p>
+                        <a href="{% url 'investments:investment-list' %}" class="btn mynav text-white fw-bold btn-sm">Invest</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col">
+                <div class="card mb-3">
+                    <div class="card-header chart text-white">
+                        Withdrawal Balance
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">Crypto: 0USDT</p>
+                        <p class="card-text">Ksh: 0Ksh</p>
+                        <a href="" class="btn btn-dark fw-bold btn-sm">Withdraw</a>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </section>
+    {% endif %}
+
+    {% if user.is_admin %}{% endif %}
+
+</div>
+{% endblock %}

@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %}Failed{% endblock %}
+
+{% block content %}
+<h1>Transaction Failed</h1>
+<p>Merchant Request ID: {{ response_data.Body.stkCallback.MerchantRequestID }}</p>
+<p>Checkout Request ID: {{ response_data.Body.stkCallback.CheckoutRequestID }}</p>
+<p>Result Code: {{ response_data.Body.stkCallback.ResultCode }}</p>
+<p>Result Description: {{ response_data.Body.stkCallback.ResultDesc }}</p>
+{% endblock %}

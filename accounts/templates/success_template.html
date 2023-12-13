@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %}Welcome{% endblock %}
+
+{% block content %}
+<h1>Transaction Successful</h1>
+<p>MerchantRequestID: {{ response_data.MerchantRequestID }}</p>
+<p>CheckoutRequestID: {{ response_data.CheckoutRequestID }}</p>
+{% endblock %}
