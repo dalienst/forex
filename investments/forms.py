@@ -30,11 +30,11 @@ class PackageForm(forms.ModelForm):
 class DepositForm(forms.ModelForm):
     class Meta:
         model = Deposit
-        fields = [
+        fields = (
             "package",
             "amount",
             "phone",
-        ]
+        )
 
 
 class WithdrawalForm(forms.ModelForm):

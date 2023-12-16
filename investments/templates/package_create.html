@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% load crispy_forms_tags %}
+
+{% block title %}Subscribe to Package{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid m-0 p-0">
+    <div class="h-75 p-5 dash " style="background-color: #123c66;">
+        <div class="text-center text-white">
+
+            <h4 class="fw-bold"><a href="{% url 'investments:portfolio' %}" class="text-decoration-none text-white">Portfolio</a> > Subscribe To A Package</h4>
+        </div>
+    </div>
+
+    <section class="container py-5 mb-3">
+        <div class="col-md-10 mx-auto col-lg-5">
+            <form method="post" class="p-4 border rounded-3">
+                {% csrf_token %}
+                <div class="form-floating mb-3">
+                    {{form.category|as_crispy_field}}
+                </div>
+                <div class="form-floating mb-3">
+                    {{form.payment_method|as_crispy_field}}
+                </div>
+
+                <button type="submit" class="btn btn-dark w-100 fw-bold">Subscribe</button>
+            </form>
+        </div>
+    </section>
+</div>
+
+{% endblock %}

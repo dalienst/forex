@@ -9,6 +9,7 @@ from investments.views import (
     PackageCreateView,
     PackageListView,
     PackageDetailView,
+    make_deposit,
 )
 
 app_name = "investments"
@@ -32,6 +33,7 @@ urlpatterns = [
     path("package/create/", PackageCreateView.as_view(), name="package-create"),
     path("packages/", PackageListView.as_view(), name="package-list"),
     path(
-        "packages/<str:id>/detail/", PackageDetailView.as_view(), name="package-detail"
+        "packages/<str:pk>/detail/", PackageDetailView.as_view(), name="package-detail"
     ),
+    path("deposit/", make_deposit, name="pay-package")
 ]

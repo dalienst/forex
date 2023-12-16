@@ -2,10 +2,125 @@
 
 {% load static %}
 
-{% block title %}{{package.name}}{% endblock %}
+{% block title %}{{package_detail}}{% endblock %}
+
+{% load crispy_forms_tags %}
 
 {% block content %}
 
+<div class="container-fluid m-0 p-0">
+    <div class="h-75 p-5 dash " style="background-color: #123c66;">
+        <div class="text-center text-white">
 
+            <h4 class="fw-bold"><a href="{% url 'investments:portfolio' %}"
+                    class="text-decoration-none text-white">Portfolio</a> > {{package_detail}}</h4>
+            <p class="fw-semibold">Subscription ID: {{package_detail.id}}</p>
+        </div>
+    </div>
+
+    <section class="container py-3">
+        <div class="row mb-3">
+            <div class="col-md-4 col-sm-12 mb-3">
+                <h5 class="fw-bold">
+                    Your Subscription Details
+                </h5>
+
+                <div class="mb-3">
+                    <label for="subscriptionID" class="form-label">Subscription ID</label>
+                    <input type="text" name="subscriptionID" disabled class="form-control" placeholder="{{package_detail.id}}">
+                </div>
+
+                <div class="mb-3">
+                    <label for="subscriptionName" class="form-label">Subscription Type</label>
+                    <input type="text" disabled class="form-control" placeholder="{{package_detail.category.name}}">
+                </div>
+
+                <div class="mb-3">
+                    <label for="subscriptionDate" class="form-label">Subscription Date</label>
+                    <input type="text" disabled class="form-control" placeholder="{{package_detail.created_at}}">
+                </div>
+
+                <div class="mb-3">
+                    <label for="subscriptionActive" class="form-label">Subscription Activation Status</label>
+                    <input type="text" disabled class="form-control" placeholder="{{package_detail.is_active}}">
+                </div>
+
+                <div class="mb-3">
+                    <label for="timeline" class="form-label">Subscription Timeline</label>
+                    <input type="text" disabled class="form-control" placeholder="7 Days">
+                </div>
+
+                <div class="mb-3">
+                    <a href="{%url 'investments:pay-package'%}" class="btn btn-dark">Deposit Funds</a>
+                </div>
+            </div>
+
+            <div class="col-md-4 col-sm-12 mb-3">
+                <h5 class="fw-bold">
+                    How to pay
+                </h5>
+                <p><small>Pay in order to activate your subscription</small></p>
+                <hr>
+
+                <div class="mt-3">
+                    <h6 class="fw-bold">Payment Channels</h6>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="card mb-3">
+                                <div class="card-header">
+                                    M-PESA Send Money
+                                </div>
+                                <div class="card-body">
+                                    <p class="card-text">
+                                        254710584581
+                                    </p>
+                                    <p class="card-text">
+                                        Dalienst Oduor
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                
+                        <div class="col-md-12 col-sm-12">
+                            <div class="card mb-3">
+                                <div class="card-header">
+                                    Crypto - TRCO
+                                </div>
+                                <div class="card-body">
+                                    <p class="card-text">
+                                        Wallet Address
+                                    </p>
+                                    <p class="card-text">
+                                        Dalienst Oduor
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-3">
+                    <h6 class="fw-bold">Subscription Charges - Kenya Shillings</h6>
+                    <p>
+                        Minimum Investment (Ksh): {{package_detail.category.price}} Ksh
+                    </p>
+                    <p>
+                        Maximum Investment (Ksh): {{package_detail.category.max_price}} Ksh
+                    </p>
+                </div>
+
+                <div class="mt-3">
+                    <h6 class="fw-bold">Subscription Charges - USDT</h6>
+                    <p>
+                        Minimum Investment (USDT): {{package_detail.category.usdt_price}}
+                    </p>
+                    <p>
+                        Maximum Investment (USDT): {{package_detail.category.usdt_max}}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
 
 {% endblock %}
