@@ -170,7 +170,7 @@ def make_deposit(request):
                 messages.error(request, "Error Processing Payment")
                 return render(
                     request,
-                    "package_detail.html",
+                    "make_deposit.html",
                     {"form": form},
                 )
 
@@ -208,8 +208,7 @@ def make_deposit(request):
             messages.success(request, "Please check your phone, payment is processing")
 
             return redirect("investments:portfolio")
-        else:
-            form = DepositForm(user=request.user)
-            form.user = request.user
+    else:
+        form = DepositForm()
 
-        return render(request, "package_detail.html", {"form": form})
+    return render(request, "make_deposit.html", {"form": form})

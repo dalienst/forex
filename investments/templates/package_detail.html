@@ -49,26 +49,9 @@
                     <label for="timeline" class="form-label">Subscription Timeline</label>
                     <input type="text" disabled class="form-control" placeholder="7 Days">
                 </div>
-            </div>
 
-            <div class="col-md-4 col-sm-12 mb-3">
-                <h5 class="fw-bold">
-                    Make Payment
-                </h5>
-                <div>
-                    <form method="post" class="p-3">
-                        {% csrf_token %}
-                        <div class="form-floating mb-3">
-                            {{form.package|as_crispy_field}}
-                        </div>
-                        <div class="form-floating mb-3">
-                            {{form.phone|as_crispy_field}}
-                        </div>
-                        <div class="form-floating mb-3">
-                            {{form.amount|as_crispy_field}}
-                        </div>
-                        <button class="btn btn-primary" type="submit">Make Payment</button>
-                    </form>
+                <div class="mb-3">
+                    <a href="{%url 'investments:pay-package'%}" class="btn btn-dark">Deposit Funds</a>
                 </div>
             </div>
 

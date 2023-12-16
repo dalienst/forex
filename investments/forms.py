@@ -30,15 +30,11 @@ class PackageForm(forms.ModelForm):
 class DepositForm(forms.ModelForm):
     class Meta:
         model = Deposit
-        fields = [
+        fields = (
             "package",
             "amount",
             "phone",
-        ]
-
-    def __init__(self, user, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields["package"].queryset = Package.objects.filter(user=user)
+        )
 
 
 class WithdrawalForm(forms.ModelForm):

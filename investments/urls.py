@@ -35,5 +35,5 @@ urlpatterns = [
     path(
         "packages/<str:pk>/detail/", PackageDetailView.as_view(), name="package-detail"
     ),
-    path("pay/", make_deposit, name="pay-package")
+    path("deposit/", make_deposit, name="pay-package")
 ]
