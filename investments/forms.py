@@ -35,6 +35,12 @@ class DepositForm(forms.ModelForm):
             "amount",
             "phone",
         )
+        # widgets = {"package"}
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Make the package field read-only
+        self.fields["package"].widget.attrs["readonly"] = True
 
 
 class WithdrawalForm(forms.ModelForm):
