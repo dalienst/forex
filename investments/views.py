@@ -42,6 +42,11 @@ from forexapp.settings import (
 )
 
 
+def landing(request):
+    packages = InvestCategory.objects.all()
+    return render(request, "landing.html", {"packages": packages})
+
+
 class InvestCategoryCreateView(
     SuccessMessageMixin, LoginRequiredMixin, UserPassesTestMixin, CreateView
 ):
@@ -64,7 +69,7 @@ class InvestCategoryListView(ListView):
     template_name = "category_list.html"
 
 
-class InvestCategoryDetailView(DetailView):
+class InvestCategoryDetailView(LoginRequiredMixin, DetailView):
     model = InvestCategory
     template_name = "category_detail.html"
 
@@ -124,5 +129,6 @@ class PackageDetailView(LoginRequiredMixin, DetailView):
 
     def get_queryset(self) -> QuerySet[Any]:
         return Package.objects.filter(user=self.request.user)
+
 
 # create a delete method that deletes the package after 7 days or moves to trash model
