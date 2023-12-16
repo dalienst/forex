@@ -1,7 +1,11 @@
 from typing import Any
+import requests
+import base64
 from django.db.models.query import QuerySet
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
+from django.utils import timezone
+from django.contrib import messages
 
 from django.contrib.messages.views import SuccessMessageMixin
 from django.views.generic import (
@@ -132,3 +136,80 @@ class PackageDetailView(LoginRequiredMixin, DetailView):
 
 
 # create a delete method that deletes the package after 7 days or moves to trash model
+
+
+"""
+Deposits view
+"""
+
+
+@login_required
+def make_deposit(request):
+    if request.method == "POST":
+        form = DepositForm(request.POST)
+        if form.is_valid():
+            user_package = form.cleaned_data["package"]
+            amount = form.cleaned_data["amount"]
+            phone = form.cleaned_data["phone"]
+
+            # package constraints
+
+            Deposit.objects.create(
+                user=request.user, package=user_package, amount=amount, phone=phone
+            )
+
+            # access token
+            access_token_url = "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials"
+            auth_response = requests.get(
+                access_token_url, auth=(CONSUMER_KEY, CONSUMER_SECRET)
+            )
+            auth_data = auth_response.json()
+            access_token = auth_data.get("access_token")
+
+            if not access_token:
+                messages.error(request, "Error Processing Payment")
+                return render(
+                    request,
+                    "package_detail.html",
+                    {"form": form},
+                )
+
+            # Prepare data for API call
+            api_url = "https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest"
+            headers = {
+                "Authorization": f"Bearer {access_token}",
+                "Content-Type": "application/json",
+            }
+
+            shortcode = str(SHORTCODE)
+            passkey = str(PASS_KEY)
+            timestamp = timezone.now().strftime("%Y%m%d%H%M%S")
+            concatenated = f"{shortcode}{passkey}{timestamp}".encode()
+            password = base64.b64encode(concatenated).decode()
+
+            payload = {
+                "BusinessShortCode": SHORTCODE,
+                "Password": password,
+                "Timestamp": timestamp,
+                "TransactionType": TRANSACTION_TYPE,
+                "Amount": amount,
+                "PartyA": phone,
+                "PartyB": SHORTCODE,
+                "PhoneNumber": phone,
+                "CallBackURL": CALLBACK_URL,
+                "AccountReference": user_package,
+                "TransactionDesc": user_package,
+            }
+
+            # Make the API call
+            api_response = requests.post(api_url, json=payload, headers=headers)
+            response_data = api_response.json()
+
+            messages.success(request, "Please check your phone, payment is processing")
+
+            return redirect("investments:portfolio")
+        else:
+            form = DepositForm(user=request.user)
+            form.user = request.user
+
+        return render(request, "package_detail.html", {"form": form})

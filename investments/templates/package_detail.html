@@ -4,6 +4,8 @@
 
 {% block title %}{{package_detail}}{% endblock %}
 
+{% load crispy_forms_tags %}
+
 {% block content %}
 
 <div class="container-fluid m-0 p-0">
@@ -18,7 +20,7 @@
 
     <section class="container py-3">
         <div class="row mb-3">
-            <div class="col-md-6 col-sm-12 mb-3">
+            <div class="col-md-4 col-sm-12 mb-3">
                 <h5 class="fw-bold">
                     Your Subscription Details
                 </h5>
@@ -49,17 +51,38 @@
                 </div>
             </div>
 
-            <div class="col-md-6 col-sm-12 mb-3">
+            <div class="col-md-4 col-sm-12 mb-3">
+                <h5 class="fw-bold">
+                    Make Payment
+                </h5>
+                <div>
+                    <form method="post" class="p-3">
+                        {% csrf_token %}
+                        <div class="form-floating mb-3">
+                            {{form.package|as_crispy_field}}
+                        </div>
+                        <div class="form-floating mb-3">
+                            {{form.phone|as_crispy_field}}
+                        </div>
+                        <div class="form-floating mb-3">
+                            {{form.amount|as_crispy_field}}
+                        </div>
+                        <button class="btn btn-primary" type="submit">Make Payment</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="col-md-4 col-sm-12 mb-3">
                 <h5 class="fw-bold">
                     How to pay
                 </h5>
-                <p><small>You need to pay in order to activate your subscription</small></p>
+                <p><small>Pay in order to activate your subscription</small></p>
                 <hr>
 
                 <div class="mt-3">
                     <h6 class="fw-bold">Payment Channels</h6>
                     <div class="row">
-                        <div class="col-md-6">
+                        <div class="col-md-12">
                             <div class="card mb-3">
                                 <div class="card-header">
                                     M-PESA Send Money
@@ -75,7 +98,7 @@
                             </div>
                         </div>
                 
-                        <div class="col-md-6 col-sm-12">
+                        <div class="col-md-12 col-sm-12">
                             <div class="card mb-3">
                                 <div class="card-header">
                                     Crypto - TRCO
