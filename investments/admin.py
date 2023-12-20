@@ -6,11 +6,14 @@ from investments.models import (
     Deposit,
     Withdrawal,
     Package,
+    PackagePayment,
+    PackageWallet,
 )
 
 admin.site.register(InvestCategory)
 admin.site.register(PaymentMethod)
-# admin.site.register(Transaction)
+admin.site.register(PackagePayment)
 admin.site.register(Deposit)
 admin.site.register(Withdrawal)
 admin.site.register(Package)
+admin.site.register(PackageWallet)

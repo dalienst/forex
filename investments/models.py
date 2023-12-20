@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth import get_user_model
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
 
 from accounts.abstracts import UniversalIdModel, TimeStampedModel
 
@@ -73,7 +75,50 @@ class Package(UniversalIdModel, TimeStampedModel):
         verbose_name_plural = "Packages"
 
     def __str__(self):
-        return self.category.name
+        return f"{self.category.name} - {self.id}"
+
+
+class PackageWallet(TimeStampedModel):
+    package = models.OneToOneField(Package, on_delete=models.CASCADE, primary_key=True)
+    amount = models.BigIntegerField(default=0)
+    withdrawable_amount = models.BigIntegerField(blank=True, null=True)
+    interest = models.BigIntegerField()
+    total_gained = models.BigIntegerField()
+    withdrawn_amount = models.BigIntegerField(default=0)
+
+    def __str__(self) -> str:
+        return f"Wallet for {self.package.id}"
+
+
+@receiver(pre_save, sender=PackageWallet)
+def interest_presave(sender, instance, **kwargs):
+    profit_rate_str = instance.package.category.profit_rate
+
+    # Extract numeric part from the string (remove '%' and any non-digit characters)
+    numeric_part = "".join(filter(str.isdigit, profit_rate_str))
+
+    # Check if numeric_part is a valid string representation of an integer
+    if numeric_part.isdigit():
+        profit_rate = int(numeric_part)
+        instance.interest = instance.amount * profit_rate
+
+
+@receiver(pre_save, sender=PackageWallet)
+def total_gained_presave(sender, instance, **kwargs):
+    if instance.amount is not None and instance.interest is not None:
+        instance.total_gained = (
+            instance.amount + instance.interest - instance.withdrawn_amount
+        )
+
+
+class PackagePayment(UniversalIdModel, TimeStampedModel):
+    package = models.ForeignKey(Package, on_delete=models.CASCADE)
+    receipt = models.CharField(max_length=255)
+    phone_number = models.BigIntegerField()
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    def __str__(self) -> str:
+        return f"Payment for {self.user.username} for package {self.package.id}."
 
 
 class Deposit(UniversalIdModel, TimeStampedModel):

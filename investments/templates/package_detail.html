@@ -13,14 +13,14 @@
         <div class="text-center text-white">
 
             <h4 class="fw-bold"><a href="{% url 'investments:portfolio' %}"
-                    class="text-decoration-none text-white">Portfolio</a> > {{package_detail}}</h4>
+                    class="text-decoration-none text-white">Portfolio</a> > {{package_detail.category.name}}</h4>
             <p class="fw-semibold">Subscription ID: {{package_detail.id}}</p>
         </div>
     </div>
 
     <section class="container py-3">
         <div class="row mb-3">
-            <div class="col-md-9 col-sm-12 mb-3">
+            <div class="col-md-6 col-sm-12 mb-3">
                 <h5 class="fw-bold">
                     Your Subscription Details
                 </h5>
@@ -29,7 +29,7 @@
 
                 <div class="mb-3">
                     <div class="card">
-                        <div class="card-header">
+                        <div class="card-header mynav text-white fw-bold">
                             {{package_detail.id}}
                         </div>
                         <div class="card-body">
@@ -67,7 +67,19 @@
                         </div>
                     </div>
                 </div>
-            </div>            
+            </div>   
+            
+            <div class="col-md-3 col-sm-12 mb-3">
+                <h6 class="fw-bold">Payment Confirmation</h6>
+                <p><small>After payment, please enter your phone number and M-PESA Transaction Code to get your wallet
+                        updated</small></p>
+                <hr>
+                <form method="POST">
+                    {% csrf_token %}
+                    {{ payment_form|crispy }}
+                    <input type="submit" class="btn btn-dark" value="Confirm">
+                </form>
+            </div>
 
             <div class="col-md-3 col-sm-12 mb-3">
                 <h5 class="fw-bold">
@@ -113,6 +125,8 @@
                     </div>
                 </div>
             </div>
+
+
         </div>
     </section>
 </div>

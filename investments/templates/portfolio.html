@@ -16,7 +16,7 @@
 </div>
 
 {% if user_packages %}
-<div class="container mt-2 py-3">
+<div class="container mt-2 py-5">
     <div class="row">
         <div class="col-md-9 col-sm-12">
             <h5 class="fw-semibold">Your Subscribed Packages</h5>
@@ -44,6 +44,12 @@
         <div class="col-md-3 col-sm-12">
             <h5 class="fw-semibold">More Info</h5>
             <p>Packages Subscribed: {{user_packages|length}}</p>
+
+            {% if user_packages|length < 3%}
+            <p>Subscribe to a package <a href="{% url 'investments:package-create' %}">here</a></p>
+            {% else %}
+            <p>Maximum subscription limit reached</p>
+            {%endif%}
         </div>
     </div>
 </div>
