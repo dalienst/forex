@@ -1,0 +1,28 @@
+.mynav {
+    background: linear-gradient(115deg, #12063b, #09555c);
+}
+
+.herobg {
+    background: linear-gradient(115deg, #92ffc0, #002661);
+}
+
+.chart {
+    background: linear-gradient(90deg, rgba(2, 0, 36, 1) 0%, rgba(2, 2, 6, 1) 23%, rgba(56, 87, 93, 1) 100%);
+}
+
+.avatarimg {
+    height: 60px;
+    width: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.herocolor {
+    background-color: #123c66;
+}
+
+.img-profile {
+    object-fit: cover;
+    height: 500px;
+    width: 500px;
+}
