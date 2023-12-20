@@ -15,6 +15,12 @@ class User(AbstractUser, UniversalIdModel, TimeStampedModel):
     is_client = models.BooleanField(default=False)
     is_admin = models.BooleanField(default=False)
 
+    def get_full_name(self) -> str:
+        return super().get_full_name()
+    
+    def get_short_name(self) -> str:
+        return super().get_short_name()
+
 
 class Client(TimeStampedModel):
     user = models.OneToOneField(

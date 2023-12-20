@@ -10,3 +10,13 @@
     background: linear-gradient(90deg, rgba(2, 0, 36, 1) 0%, rgba(2, 2, 6, 1) 23%, rgba(56, 87, 93, 1) 100%);
 }
 
+.avatarimg {
+    height: 60px;
+    width: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.herocolor {
+    background-color: #123c66;
+}

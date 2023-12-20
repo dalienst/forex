@@ -41,6 +41,7 @@ ALLOWED_HOSTS = [
     "https://dailyreports.vercel.app",
     "https://afrivault.vercel.app",
     "https://dalienstafrica.vercel.app",
+    "2dd0-102-212-11-38.ngrok-free.app",
     "dailyreports.vercel.app",
     "dalienstafrica.vercel.app",
     "afrivault.vercel.app",
@@ -91,29 +92,27 @@ CRISPY_TEMPLATE_PACK = "bootstrap5"
 
 CORS_ORIGIN_WHITELIST = [
     "http://localhost:3000",
-    "http://127.0.0.1:3000",
     "https://theclassroom.onrender.com",
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
+    "https://2dd0-102-212-11-38.ngrok-free.app",
 ]
 
 CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
-    "http://127.0.0.1:3000",
     "https://theclassroom.onrender.com",
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
+    "https://2dd0-102-212-11-38.ngrok-free.app",
 ]
+
 
 CORS_ALLOW_ALL_ORIGINS = True
 
 CORS_ALLOW_HEADERS = default_headers + ("Access-Control-Allow-Origin",)
 
-# CSRF_TRUSTED_ORIGINS = [
-#     "https://attendbend.up.railway.app",
-# ]
+CSRF_TRUSTED_ORIGINS = [
+    "https://attendbend.up.railway.app",
+    "https://2dd0-102-212-11-38.ngrok-free.app",
+]
 
 ROOT_URLCONF = "forexapp.urls"
 

@@ -23,7 +23,6 @@ class PackageForm(forms.ModelForm):
         model = Package
         fields = [
             "category",
-            "payment_method",
         ]
 
 
@@ -31,23 +30,21 @@ class DepositForm(forms.ModelForm):
     class Meta:
         model = Deposit
         fields = (
-            "package",
             "amount",
             "phone",
         )
         # widgets = {"package"}
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # Make the package field read-only
-        self.fields["package"].widget.attrs["readonly"] = True
+    # def __init__(self, *args, **kwargs):
+    #     super().__init__(*args, **kwargs)
+    #     # Make the package field read-only
+    #     self.fields["package"].widget.attrs["readonly"] = True
 
 
 class WithdrawalForm(forms.ModelForm):
     class Meta:
         model = Withdrawal
         fields = [
-            "package",
             "amount",
             "phone",
         ]

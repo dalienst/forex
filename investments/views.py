@@ -12,6 +12,8 @@ from django.contrib import messages
 from django.urls import reverse_lazy
 from django.http import JsonResponse
 from django.core.serializers import serialize
+from django.http import HttpResponseBadRequest
+from django.shortcuts import get_object_or_404
 
 from django.contrib.messages.views import SuccessMessageMixin
 from django.views.generic import (
@@ -31,7 +33,6 @@ from django.urls import reverse_lazy
 from investments.models import (
     InvestCategory,
     PaymentMethod,
-    Transaction,
     Deposit,
     Withdrawal,
     Package,
@@ -132,6 +133,17 @@ class PackageCreateView(SuccessMessageMixin, LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         # Set the user field to the currently logged-in user
         form.instance.user = self.request.user
+
+        # Check if the user already has a package for the selected category
+        category = form.cleaned_data["category"]
+        existing_package = Package.objects.filter(
+            user=self.request.user, category=category
+        ).exists()
+        if existing_package:
+            # If the user already has a package for the selected category, display an error
+            messages.error(self.request, f"You already have a {category} package.")
+            return self.form_invalid(form)
+        new_package = form.save()
         return super().form_valid(form)
 
 
@@ -169,17 +181,17 @@ class PackageDetailView(LoginRequiredMixin, DetailView):
             phone = deposit_form.cleaned_data["phone"]
 
             # validation of amount
-            if (
-                amount < user_package.category.price
-                or amount > user_package.category.max_price
-            ):
-                messages.error(
-                    request,
-                    f"Amount should be between {user_package.category.price} and {user_package.category.max_price}",
-                )
-                return self.render_to_response(
-                    self.get_context_data(deposit_form=deposit_form)
-                )
+            # if (
+            #     amount < user_package.category.price
+            #     or amount > user_package.category.max_price
+            # ):
+            #     messages.error(
+            #         request,
+            #         f"Amount should be between {user_package.category.price} and {user_package.category.max_price}",
+            #     )
+            #     return self.render_to_response(
+            #         self.get_context_data(deposit_form=deposit_form)
+            #     )
 
             # Get access token
             access_token_url = "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials"
@@ -220,7 +232,7 @@ class PackageDetailView(LoginRequiredMixin, DetailView):
                 "PartyA": phone,
                 "PartyB": SHORTCODE,
                 "PhoneNumber": phone,
-                "CallBackURL": CALLBACK_URL,
+                "CallBackURL": "https://2dd0-102-212-11-38.ngrok-free.app/investments/deposit/",
                 "AccountReference": description_transaction,
                 "TransactionDesc": description_transaction,
             }
@@ -230,10 +242,6 @@ class PackageDetailView(LoginRequiredMixin, DetailView):
             response_data = api_response.json()
 
             messages.success(request, "Please check your phone, payment is processing")
-
-            Deposit.objects.create(
-                user=request.user, package=user_package, amount=amount, phone=phone
-            )
 
             return render(
                 request,
@@ -253,3 +261,30 @@ class PackageDetailView(LoginRequiredMixin, DetailView):
 
 
 # create a delete method that deletes the package after 7 days or moves to trash model
+
+
+class DepositResultsView(CreateView):
+    def post(self, request, *args, **kwargs):
+        try:
+            result = request.data["Body"]["stkCallback"]["CallbackMetadata"]["Item"]
+            amount = result[0]["Value"]
+            transaction_ref = result[1]["Value"]
+            phone = result[3]["Value"]
+            timestamp = result[2]["Value"]
+            success_code = request.data["Body"]["stkCallback"]["ResultCode"] == 0
+        except KeyError as e:
+            messages.error(request, f"Invalid callback data. Missing key: {e}")
+            return render(request, "error_template.html")
+        except (IndexError, TypeError):
+            messages.error(request, "Invalid callback data. Unexpected data structure.")
+            return render(request, "error_template.html")
+
+        if success_code:
+            Deposit.objects.create(
+                amount=amount, phone=phone, trans_ref=transaction_ref
+            )
+            messages.success(request, "Payment processed successfully")
+            return render(request, "payment_success_template.html")
+        else:
+            messages.error(request, "Could not process payment")
+            return render(request, "error_template.html")
