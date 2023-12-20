@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %}{{user.get_full_name}}{% endblock %}
+
+{% load crispy_forms_tags %}
+
+{% block content %}
+<section class="container mt-3 mb-3">
+    <div class="row flex-lg-row justify-content-center align-items-center g-5 py-5">
+        <div class="col-10 col-sm-8 col-lg-6">
+            {% if client_detail.image %}
+            <img src="{{client_detail.image.url}}" alt="" class="img-fluid img-profile d-block mx-lg-auto">
+            {% else %}
+            <img src="https://images.unsplash.com/photo-1634926878768-2a5b3c42f139?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTV8fGF2YXRhcnxlbnwwfHwwfHx8MA%3D%3D"
+                alt="" class="img-fluid img-profile d-block mx-lg-auto">
+            {% endif %}
+        </div>
+        <div class="col-lg-6">
+            <h1 class="fw-bold">{{user.get_full_name}}</h1>
+            <h2 class="mb-3">{{user.get_username}}</h2>
+            <p class="h5 fw-normal mb-3"><i class="fw-semibold bi bi-envelope-fill"></i> {{user.email}}</p>
+            <p class="h5 fw-normal mb-3"><i class="fw-semibold bi-telephone-fill"></i> {{client_detail.phone_number}}</p>
+            <p class="h5 fw-normal mb-3"><i class="fw-semibold bi-passport-fill"></i> {{client_detail.identification}}</p>
+            <a href="{% url 'accounts:client-update' user.id%}" class="btn btn-dark mb-3 text-uppercase">update profile</a>
+        </div>
+    </div>
+    
+</section>
+
+{% endblock %}

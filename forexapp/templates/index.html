@@ -87,3 +87,17 @@
     </div>
 
 </div>
+
+<div class="col-md-4 col-sm-12 mb-3">
+    <h5 class="fw-bold">
+        M-PESA Investment Deposit
+    </h5>
+    <!-- Deposit Form -->
+    <div class="mb-3">
+        <form method="post" class="p-3">
+            {% csrf_token %}
+            {{ deposit_form|crispy }}
+            <button class="btn btn-primary" type="submit">Deposit Funds</button>
+        </form>
+    </div>
+</div>

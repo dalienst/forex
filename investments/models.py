@@ -8,6 +8,7 @@ User = get_user_model()
 
 class InvestCategory(UniversalIdModel, TimeStampedModel):
     name = models.CharField(max_length=255)
+    short_name = models.CharField(max_length=255, default="Category")
     description = models.TextField()
     price = models.PositiveIntegerField(blank=True, null=True)
     max_price = models.PositiveIntegerField(blank=True, null=True)
@@ -56,18 +57,16 @@ class Package(UniversalIdModel, TimeStampedModel):
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     category = models.ForeignKey(InvestCategory, on_delete=models.CASCADE)
-    payment_method = models.ForeignKey(PaymentMethod, on_delete=models.CASCADE)
-    is_active = models.BooleanField(default=False)
 
-    @property
-    def available_funds(self):
-        total_deposits = (
-            self.deposits.aggregate(total=models.Sum("amount"))["total"] or 0
-        )
-        total_withdrawals = (
-            self.withdrawals.aggregate(total=models.Sum("amount"))["total"] or 0
-        )
-        return total_deposits - total_withdrawals
+    # @property
+    # def available_funds(self):
+    #     total_deposits = (
+    #         self.deposits.aggregate(total=models.Sum("amount"))["total"] or 0
+    #     )
+    #     total_withdrawals = (
+    #         self.withdrawals.aggregate(total=models.Sum("amount"))["total"] or 0
+    #     )
+    #     return total_deposits - total_withdrawals
 
     class Meta:
         verbose_name = "Package"
@@ -82,12 +81,9 @@ class Deposit(UniversalIdModel, TimeStampedModel):
     To handle deposit of funds via Mpesa only
     """
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    package = models.ForeignKey(
-        Package, on_delete=models.CASCADE, related_name="deposits"
-    )
     amount = models.PositiveIntegerField()
     phone = models.BigIntegerField()
+    trans_ref = models.CharField(max_length=100, unique=True)
 
 
 class Withdrawal(UniversalIdModel, TimeStampedModel):
@@ -95,24 +91,20 @@ class Withdrawal(UniversalIdModel, TimeStampedModel):
     To handle withdrawal of funds via Mpesa only
     """
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    package = models.ForeignKey(
-        Package, on_delete=models.CASCADE, related_name="withdrawals"
-    )
     amount = models.PositiveIntegerField()
     phone = models.BigIntegerField()
     is_processed = models.BooleanField(default=False)
 
 
-class Transaction(UniversalIdModel, TimeStampedModel):
-    package = models.ForeignKey(
-        Package, on_delete=models.CASCADE, related_name="transactions"
-    )
-    amount = models.PositiveIntegerField()
-    transaction_type = models.CharField(
-        max_length=10, choices=[("deposit", "Deposit"), ("withdrawal", "Withdrawal")]
-    )
-    phone = models.BigIntegerField()
+# class Transaction(UniversalIdModel, TimeStampedModel):
+#     package = models.ForeignKey(
+#         Package, on_delete=models.CASCADE, related_name="transactions"
+#     )
+#     amount = models.PositiveIntegerField()
+#     transaction_type = models.CharField(
+#         max_length=10, choices=[("deposit", "Deposit"), ("withdrawal", "Withdrawal")]
+#     )
+#     phone = models.BigIntegerField()
 
-    class Meta:
-        ordering = ["-created_at"]
+#     class Meta:
+#         ordering = ["-created_at"]

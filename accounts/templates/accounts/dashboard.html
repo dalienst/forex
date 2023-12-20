@@ -8,41 +8,89 @@
 <div class="container-fluid p-0">
     {% if user.is_client %}
 
-    <div class="dash border-bottom p-5 rounded-5 rounded-top-0 h-50 px-3 herobg">
+    <div class="dash border-bottom p-5 h-50 px-3 herocolor">
         <div class="text-center text-white">
             <h3 class="fw-bold">
-                Welcome {{user.first_name}}
+                Welcome {{user.get_short_name}}
             </h3>
+            <p class="fw-semibold">Dashboard</p>
         </div>
     </div>
 
     <section id="assets" class="py-3 mt-3 container">
         <div class="row mb-3">
 
-            <div class="col-md-6 col-sm-12">
+            <div class="col-md-4 col-sm-12">
+                <div class="card mb-3">
+                    {% for profile in user_profile %}
+                    <div class="card-body">
+                        {% if profile.image %}
+                        <img src="{{profile.image.url}}" alt="" class="avatarimg mb-3">
+                        {% else %}
+                        <img src="https://images.unsplash.com/photo-1634926878768-2a5b3c42f139?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTV8fGF2YXRhcnxlbnwwfHwwfHx8MA%3D%3D"
+                            alt="" class="avatarimg mb-3">
+                        {% endif %}
+                        <p class="card-text fw-semibold">{{user.get_full_name}}</p>
+                        <p class="card-text">Phone Number: {{profile.phone_number}}</p>
+                        <p class="card-text">Identification Number: {{profile.identification}}</p>
+                        <a href="{%url 'accounts:client-profile' profile.user.id%}" class="btn btn-dark">Update</a>
+                    </div>
+                    {% endfor %}
+                </div>
                 <div class="card mb-3">
                     <div class="card-header chart text-white">
-                        Investment Balance
+                        Wallet
                     </div>
                     <div class="card-body">
-                        <p class="card-text">Crypto: 0USDT</p>
                         <p class="card-text">Ksh: 0Ksh</p>
-                        <a href="{% url 'investments:investment-list' %}" class="btn mynav text-white fw-bold btn-sm">Invest</a>
+                        <p class="card-text">Crypto: 0USDT</p>
+                        <a href="" class="btn btn-dark fw-bold btn-sm">Withdraw</a>
                     </div>
                 </div>
             </div>
 
-            <div class="col-md-6 col-sm-12">
+            <div class="col-md-4 col-sm-12">
                 <div class="card mb-3">
                     <div class="card-header chart text-white">
-                        Withdrawal Balance
+                        Investment Packages
                     </div>
                     <div class="card-body">
-                        <p class="card-text">Crypto: 0USDT</p>
-                        <p class="card-text">Ksh: 0Ksh</p>
-                        <a href="" class="btn btn-dark fw-bold btn-sm">Withdraw</a>
+                        {% if user_packages %}
+                        <p class="card-text">Packages Invested: {{user_packages|length}}</p>
+                        {% else %}
+                        <p class="card-text">Packages Invested: 0</p>
+                        <p class="card-text">Create a Package subscription <a href="{% url 'investments:package-create' %}">here</a></p>
+                        {% endif %}
                     </div>
                 </div>
+                {% if user_packages %}
+                {% for user_package in user_packages %}
+                <div class="card mb-3">
+                    <div class="card-header">
+                        {{user_package.category.name}}
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">
+                            <p class="card-text">
+                                ID: <small>{{user_package.id}}</small>
+                            </p>
+                            Subscribed: {{user_package.created_at}}
+                        </p>
+                    </div>
+                    <div class="card-footer bg-white">
+                        <a href="{% url 'investments:package-detail' user_package.id %}" class="btn btn-sm btn-dark">Manage</a>
+                    </div>
+                </div>
+                {% endfor %}
+                {% else %}
+                <p class="fw-bold border p-3 rounded bg-success">Packages will display here.</p>
+                {% endif %}
+
+            </div>
+
+            <div class="col-md-4 col-sm-12">
+                <h6 class="fw-bold">Notifications</h6>
+                <hr>
             </div>
             
         </div>

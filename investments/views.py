@@ -1,4 +1,7 @@
+from datetime import datetime
+import json
 from typing import Any
+from uuid import UUID
 import requests
 import base64
 from django.db.models.query import QuerySet
@@ -6,6 +9,11 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from django.contrib import messages
+from django.urls import reverse_lazy
+from django.http import JsonResponse
+from django.core.serializers import serialize
+from django.http import HttpResponseBadRequest
+from django.shortcuts import get_object_or_404
 
 from django.contrib.messages.views import SuccessMessageMixin
 from django.views.generic import (
@@ -25,7 +33,6 @@ from django.urls import reverse_lazy
 from investments.models import (
     InvestCategory,
     PaymentMethod,
-    Transaction,
     Deposit,
     Withdrawal,
     Package,
@@ -44,6 +51,15 @@ from forexapp.settings import (
     CONSUMER_KEY,
     CONSUMER_SECRET,
 )
+
+
+class CustomJSONEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, (UUID,)):
+            return str(obj)
+        elif isinstance(obj, datetime):
+            return obj.strftime("%Y-%m-%d %H:%M:%S")
+        return super().default(obj)
 
 
 def landing(request):
@@ -117,6 +133,17 @@ class PackageCreateView(SuccessMessageMixin, LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         # Set the user field to the currently logged-in user
         form.instance.user = self.request.user
+
+        # Check if the user already has a package for the selected category
+        category = form.cleaned_data["category"]
+        existing_package = Package.objects.filter(
+            user=self.request.user, category=category
+        ).exists()
+        if existing_package:
+            # If the user already has a package for the selected category, display an error
+            messages.error(self.request, f"You already have a {category} package.")
+            return self.form_invalid(form)
+        new_package = form.save()
         return super().form_valid(form)
 
 
@@ -134,31 +161,39 @@ class PackageDetailView(LoginRequiredMixin, DetailView):
     def get_queryset(self) -> QuerySet[Any]:
         return Package.objects.filter(user=self.request.user)
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        deposit_form = DepositForm(initial={"package": self.object})
+        serialized_data = serialize("json", [self.object], cls=CustomJSONEncoder)
+        context["deposit_form"] = deposit_form
+        context["package_data_json"] = serialized_data
+        return context
 
-# create a delete method that deletes the package after 7 days or moves to trash model
+    def get_success_url(self):
+        return reverse_lazy("investments:package-detail", kwargs={"pk": self.object.pk})
 
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        deposit_form = DepositForm(request.POST)
+        if deposit_form.is_valid():
+            user_package = self.object
+            amount = deposit_form.cleaned_data["amount"]
+            phone = deposit_form.cleaned_data["phone"]
 
-"""
-Deposits view
-"""
+            # validation of amount
+            # if (
+            #     amount < user_package.category.price
+            #     or amount > user_package.category.max_price
+            # ):
+            #     messages.error(
+            #         request,
+            #         f"Amount should be between {user_package.category.price} and {user_package.category.max_price}",
+            #     )
+            #     return self.render_to_response(
+            #         self.get_context_data(deposit_form=deposit_form)
+            #     )
 
-
-@login_required
-def make_deposit(request):
-    if request.method == "POST":
-        form = DepositForm(request.POST)
-        if form.is_valid():
-            user_package = form.cleaned_data["package"]
-            amount = form.cleaned_data["amount"]
-            phone = form.cleaned_data["phone"]
-
-            # package constraints
-
-            Deposit.objects.create(
-                user=request.user, package=user_package, amount=amount, phone=phone
-            )
-
-            # access token
+            # Get access token
             access_token_url = "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials"
             auth_response = requests.get(
                 access_token_url, auth=(CONSUMER_KEY, CONSUMER_SECRET)
@@ -170,8 +205,8 @@ def make_deposit(request):
                 messages.error(request, "Error Processing Payment")
                 return render(
                     request,
-                    "make_deposit.html",
-                    {"form": form},
+                    "package_detail.html",
+                    {"form": deposit_form},
                 )
 
             # Prepare data for API call
@@ -186,6 +221,7 @@ def make_deposit(request):
             timestamp = timezone.now().strftime("%Y%m%d%H%M%S")
             concatenated = f"{shortcode}{passkey}{timestamp}".encode()
             password = base64.b64encode(concatenated).decode()
+            description_transaction = str(user_package)
 
             payload = {
                 "BusinessShortCode": SHORTCODE,
@@ -196,9 +232,9 @@ def make_deposit(request):
                 "PartyA": phone,
                 "PartyB": SHORTCODE,
                 "PhoneNumber": phone,
-                "CallBackURL": CALLBACK_URL,
-                "AccountReference": user_package,
-                "TransactionDesc": user_package,
+                "CallBackURL": "https://2dd0-102-212-11-38.ngrok-free.app/investments/deposit/",
+                "AccountReference": description_transaction,
+                "TransactionDesc": description_transaction,
             }
 
             # Make the API call
@@ -207,8 +243,48 @@ def make_deposit(request):
 
             messages.success(request, "Please check your phone, payment is processing")
 
-            return redirect("investments:portfolio")
-    else:
-        form = DepositForm()
+            return render(
+                request,
+                "success_template.html",
+                {"message": response_data, "form": deposit_form},
+            )
+            # return redirect(self.get_success_url())
+        else:
+            messages.error(request, "Error in deposit form.")
+            return self.render_to_response(
+                self.get_context_data(deposit_form=deposit_form)
+            )
 
-    return render(request, "make_deposit.html", {"form": form})
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        return super().get(request, *args, **kwargs)
+
+
+# create a delete method that deletes the package after 7 days or moves to trash model
+
+
+class DepositResultsView(CreateView):
+    def post(self, request, *args, **kwargs):
+        try:
+            result = request.data["Body"]["stkCallback"]["CallbackMetadata"]["Item"]
+            amount = result[0]["Value"]
+            transaction_ref = result[1]["Value"]
+            phone = result[3]["Value"]
+            timestamp = result[2]["Value"]
+            success_code = request.data["Body"]["stkCallback"]["ResultCode"] == 0
+        except KeyError as e:
+            messages.error(request, f"Invalid callback data. Missing key: {e}")
+            return render(request, "error_template.html")
+        except (IndexError, TypeError):
+            messages.error(request, "Invalid callback data. Unexpected data structure.")
+            return render(request, "error_template.html")
+
+        if success_code:
+            Deposit.objects.create(
+                amount=amount, phone=phone, trans_ref=transaction_ref
+            )
+            messages.success(request, "Payment processed successfully")
+            return render(request, "payment_success_template.html")
+        else:
+            messages.error(request, "Could not process payment")
+            return render(request, "error_template.html")

@@ -25,7 +25,7 @@
                 </p>
                 <div class="d-flex flex-row justify-content-start align-items-center">
                     <div>
-                        <a href="" class="btn btn-lg border rounded fw-semibold shadow-lg bg-body-tertiary ">Get
+                        <a href="{% url 'accounts:signup-client' %}" class="btn btn-lg border rounded fw-semibold shadow-lg bg-body-tertiary ">Get
                             Started</a>
                     </div>
                     <div class="ms-2">
@@ -39,7 +39,7 @@
 </div>
 
 <div class="container-fluid chart">
-    <section id="charts" class="py-5">
+    <section id="charts" class="py-5 container">
         <!-- TradingView Widget BEGIN -->
         <div class="tradingview-widget-container" style="height:600px;width:100%">
             <div id="tradingview_d768c" style="height:calc(100% - 32px);width:100%"></div>

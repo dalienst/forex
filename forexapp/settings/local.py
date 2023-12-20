@@ -12,6 +12,7 @@ ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
     "project-tracker-824z.onrender.com",
+    "2dd0-102-212-11-38.ngrok-free.app",
 ]
 
 DEBUG = True

@@ -22,8 +22,8 @@ from django.contrib.auth import get_user_model
 from django.conf import settings
 
 from accounts.models import Client, Admin
-from accounts.forms import ClientCreationForm, AdminCreationForm
-from investments.models import InvestCategory
+from accounts.forms import ClientCreationForm, AdminCreationForm, ClientForm
+from investments.models import InvestCategory, PaymentMethod, Package
 
 User = get_user_model()
 
@@ -31,7 +31,19 @@ User = get_user_model()
 @login_required
 def dashboard(request):
     investcategory = InvestCategory.objects.all()
-    return render(request, "accounts/dashboard.html", {"investcategory": investcategory})
+    paymentmethods = PaymentMethod.objects.all()
+    user_packages = Package.objects.filter(user=request.user)
+    user_profile = Client.objects.filter(user=request.user)
+    return render(
+        request,
+        "accounts/dashboard.html",
+        {
+            "investcategory": investcategory,
+            "paymentmethods": paymentmethods,
+            "user_packages": user_packages,
+            "user_profile": user_profile,
+        },
+    )
 
 
 class UserListView(UserPassesTestMixin, ListView):
@@ -72,6 +84,7 @@ class ClientSignUpView(SuccessMessageMixin, CreateView):
 class ClientDetailView(LoginRequiredMixin, DetailView):
     model = Client
     template_name = "accounts/user_profile.html"
+    context_object_name = "client_detail"
 
     def get_queryset(self):
         return Client.objects.filter(user=self.request.user)
@@ -79,9 +92,13 @@ class ClientDetailView(LoginRequiredMixin, DetailView):
 
 class ClientUpdateView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
     model = Client
-    fields = ["image"]
     template_name = "accounts/user_update.html"
     success_message = "Profile Updated Successfully!"
+    fields = [
+        "image",
+        "phone_number",
+        "identification",
+    ]
 
     def get_queryset(self):
         return Client.objects.filter(user=self.request.user)
