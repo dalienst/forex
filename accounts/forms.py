@@ -47,3 +47,19 @@ class AdminCreationForm(UserCreationForm):
         user.save()
         Admin.objects.create(user=user)
         return user
+
+
+class ClientForm(forms.ModelForm):
+    class Meta:
+        model = Client
+        fields = [
+            "image",
+            "phone_number",
+            "identification",
+        ]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["image"].label = "Profile Picture"
+        self.fields["phone_number"].label = "Phone Number"
+        self.fields["identification"].label = "ID/Passport Number"

@@ -20,6 +20,10 @@ class User(AbstractUser, UniversalIdModel, TimeStampedModel):
     
     def get_short_name(self) -> str:
         return super().get_short_name()
+    
+    def get_username(self) -> str:
+        return super().get_username()
+    
 
 
 class Client(TimeStampedModel):
@@ -29,7 +33,7 @@ class Client(TimeStampedModel):
         primary_key=True,
         related_name="client",
     )
-    image = CloudinaryField("client_image", blank=True, null=True)
+    image = CloudinaryField("client_images", blank=True, null=True)
     phone_number = models.BigIntegerField(blank=True, null=True)
     identification = models.BigIntegerField(blank=True, null=True)
 

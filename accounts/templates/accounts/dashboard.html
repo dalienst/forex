@@ -25,7 +25,7 @@
                     {% for profile in user_profile %}
                     <div class="card-body">
                         {% if profile.image %}
-                        <img src="{{profile.image}}" alt="" class="img-fluid">
+                        <img src="{{profile.image.url}}" alt="" class="avatarimg mb-3">
                         {% else %}
                         <img src="https://images.unsplash.com/photo-1634926878768-2a5b3c42f139?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTV8fGF2YXRhcnxlbnwwfHwwfHx8MA%3D%3D"
                             alt="" class="avatarimg mb-3">
@@ -77,6 +77,9 @@
                             Subscribed: {{user_package.created_at}}
                         </p>
                     </div>
+                    <div class="card-footer bg-white">
+                        <a href="{% url 'investments:package-detail' user_package.id %}" class="btn btn-sm btn-dark">Manage</a>
+                    </div>
                 </div>
                 {% endfor %}
                 {% else %}
@@ -87,6 +90,7 @@
 
             <div class="col-md-4 col-sm-12">
                 <h6 class="fw-bold">Notifications</h6>
+                <hr>
             </div>
             
         </div>

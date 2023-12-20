@@ -22,7 +22,7 @@ from django.contrib.auth import get_user_model
 from django.conf import settings
 
 from accounts.models import Client, Admin
-from accounts.forms import ClientCreationForm, AdminCreationForm
+from accounts.forms import ClientCreationForm, AdminCreationForm, ClientForm
 from investments.models import InvestCategory, PaymentMethod, Package
 
 User = get_user_model()
@@ -84,6 +84,7 @@ class ClientSignUpView(SuccessMessageMixin, CreateView):
 class ClientDetailView(LoginRequiredMixin, DetailView):
     model = Client
     template_name = "accounts/user_profile.html"
+    context_object_name = "client_detail"
 
     def get_queryset(self):
         return Client.objects.filter(user=self.request.user)
@@ -91,9 +92,13 @@ class ClientDetailView(LoginRequiredMixin, DetailView):
 
 class ClientUpdateView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
     model = Client
-    fields = ["image"]
     template_name = "accounts/user_update.html"
     success_message = "Profile Updated Successfully!"
+    fields = [
+        "image",
+        "phone_number",
+        "identification",
+    ]
 
     def get_queryset(self):
         return Client.objects.filter(user=self.request.user)

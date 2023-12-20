@@ -20,3 +20,9 @@
 .herocolor {
     background-color: #123c66;
 }
+
+.img-profile {
+    object-fit: cover;
+    height: 500px;
+    width: 500px;
+}

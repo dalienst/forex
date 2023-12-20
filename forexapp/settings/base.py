@@ -214,3 +214,5 @@ CONSUMER_SECRET = config("CONSUMER_SECRET")
 ACCESS_TOKEN_URL = config("ACCESS_TOKEN_URL")
 CALLBACK_URL = config("CALLBACK_URL")
 PASS_KEY = config("PASS_KEY")
+
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
