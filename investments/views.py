@@ -173,7 +173,10 @@ class PackageDetailView(LoginRequiredMixin, DetailView):
         # Serialize the user package data if needed
         serialized_data = serialize("json", [user_package], cls=CustomJSONEncoder)
 
+        package_wallet = PackageWallet.objects.get(package=user_package)
+
         # Add the form and serialized data to the context
+        context["package_wallet"] = package_wallet
         context["payment_form"] = payment_form
         context["package_data_json"] = serialized_data
 
@@ -219,6 +222,10 @@ class PackageDetailView(LoginRequiredMixin, DetailView):
 
 # create a delete method that deletes the package after 7 days or moves to trash model
 
+
+# class PackageWalletDetail(LoginRequiredMixin, DetailView):
+#     model = PackageWallet
+#     template_name
 
 
 class DepositResultsView(CreateView):

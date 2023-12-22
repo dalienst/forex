@@ -81,7 +81,7 @@ class Package(UniversalIdModel, TimeStampedModel):
 class PackageWallet(TimeStampedModel):
     package = models.OneToOneField(Package, on_delete=models.CASCADE, primary_key=True)
     amount = models.BigIntegerField(default=0)
-    withdrawable_amount = models.BigIntegerField(blank=True, null=True)
+    withdrawable_amount = models.BigIntegerField()
     interest = models.BigIntegerField()
     total_gained = models.BigIntegerField()
     withdrawn_amount = models.BigIntegerField(default=0)
@@ -101,6 +101,14 @@ def interest_presave(sender, instance, **kwargs):
     if numeric_part.isdigit():
         profit_rate = int(numeric_part)
         instance.interest = instance.amount * profit_rate
+
+
+@receiver(pre_save, sender=PackageWallet)
+def withdrawable_amount_presave(sender, instance, **kwargs):
+    if instance.amount == 0:
+        instance.withdrawable_amount = 0
+    else:
+        instance.withdrawable_amount = instance.package.category.daily_withdrawal
 
 
 @receiver(pre_save, sender=PackageWallet)
