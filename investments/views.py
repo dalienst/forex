@@ -19,7 +19,6 @@ from django.contrib.messages.views import SuccessMessageMixin
 from django.views.generic import (
     CreateView,
     UpdateView,
-    DeleteView,
     ListView,
     DetailView,
 )
@@ -34,14 +33,14 @@ from investments.models import (
     InvestCategory,
     PaymentMethod,
     Deposit,
-    Withdrawal,
     Package,
+    PackagePayment,
+    PackageWallet,
 )
 from investments.forms import (
     InvestCategoryForm,
-    DepositForm,
-    WithdrawalForm,
     PackageForm,
+    PackagePaymentForm,
 )
 from forexapp.settings import (
     SHORTCODE,
@@ -139,11 +138,12 @@ class PackageCreateView(SuccessMessageMixin, LoginRequiredMixin, CreateView):
         existing_package = Package.objects.filter(
             user=self.request.user, category=category
         ).exists()
+
         if existing_package:
             # If the user already has a package for the selected category, display an error
-            messages.error(self.request, f"You already have a {category} package.")
+            messages.error(self.request, f"You already have a {category}.")
             return self.form_invalid(form)
-        new_package = form.save()
+
         return super().form_valid(form)
 
 
@@ -163,10 +163,23 @@ class PackageDetailView(LoginRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        deposit_form = DepositForm(initial={"package": self.object})
-        serialized_data = serialize("json", [self.object], cls=CustomJSONEncoder)
-        context["deposit_form"] = deposit_form
+
+        # Retrieve the package information
+        user_package = self.get_object()
+
+        # Pass the package information to the form
+        payment_form = PackagePaymentForm(initial={"package": user_package})
+
+        # Serialize the user package data if needed
+        serialized_data = serialize("json", [user_package], cls=CustomJSONEncoder)
+
+        package_wallet = PackageWallet.objects.get(package=user_package)
+
+        # Add the form and serialized data to the context
+        context["package_wallet"] = package_wallet
+        context["payment_form"] = payment_form
         context["package_data_json"] = serialized_data
+
         return context
 
     def get_success_url(self):
@@ -174,86 +187,33 @@ class PackageDetailView(LoginRequiredMixin, DetailView):
 
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
-        deposit_form = DepositForm(request.POST)
-        if deposit_form.is_valid():
-            user_package = self.object
-            amount = deposit_form.cleaned_data["amount"]
-            phone = deposit_form.cleaned_data["phone"]
+        payment_form = PackagePaymentForm(request.POST)
+        if payment_form.is_valid():
+            package = self.object
+            user = self.request.user
+            phone_number = request.POST.get("phone_number")
+            receipt = request.POST.get("receipt")
 
-            # validation of amount
-            # if (
-            #     amount < user_package.category.price
-            #     or amount > user_package.category.max_price
-            # ):
-            #     messages.error(
-            #         request,
-            #         f"Amount should be between {user_package.category.price} and {user_package.category.max_price}",
-            #     )
-            #     return self.render_to_response(
-            #         self.get_context_data(deposit_form=deposit_form)
-            #     )
-
-            # Get access token
-            access_token_url = "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials"
-            auth_response = requests.get(
-                access_token_url, auth=(CONSUMER_KEY, CONSUMER_SECRET)
+            PackagePayment.objects.create(
+                user=user,
+                package=package,
+                receipt=receipt,
+                phone_number=phone_number,
             )
-            auth_data = auth_response.json()
-            access_token = auth_data.get("access_token")
 
-            if not access_token:
-                messages.error(request, "Error Processing Payment")
-                return render(
-                    request,
-                    "package_detail.html",
-                    {"form": deposit_form},
-                )
-
-            # Prepare data for API call
-            api_url = "https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest"
-            headers = {
-                "Authorization": f"Bearer {access_token}",
-                "Content-Type": "application/json",
-            }
-
-            shortcode = str(SHORTCODE)
-            passkey = str(PASS_KEY)
-            timestamp = timezone.now().strftime("%Y%m%d%H%M%S")
-            concatenated = f"{shortcode}{passkey}{timestamp}".encode()
-            password = base64.b64encode(concatenated).decode()
-            description_transaction = str(user_package)
-
-            payload = {
-                "BusinessShortCode": SHORTCODE,
-                "Password": password,
-                "Timestamp": timestamp,
-                "TransactionType": TRANSACTION_TYPE,
-                "Amount": amount,
-                "PartyA": phone,
-                "PartyB": SHORTCODE,
-                "PhoneNumber": phone,
-                "CallBackURL": "https://2dd0-102-212-11-38.ngrok-free.app/investments/deposit/",
-                "AccountReference": description_transaction,
-                "TransactionDesc": description_transaction,
-            }
-
-            # Make the API call
-            api_response = requests.post(api_url, json=payload, headers=headers)
-            response_data = api_response.json()
-
-            messages.success(request, "Please check your phone, payment is processing")
-
-            return render(
+            messages.success(
                 request,
-                "success_template.html",
-                {"message": response_data, "form": deposit_form},
+                "Payment Confirmation Received. Package will be updated shortly",
             )
-            # return redirect(self.get_success_url())
-        else:
-            messages.error(request, "Error in deposit form.")
-            return self.render_to_response(
-                self.get_context_data(deposit_form=deposit_form)
-            )
+
+            return redirect(self.get_success_url())
+        messages.error(request, "Error in payment confirmation form.")
+
+        # Use super() to get the context and add the payment_form to it
+        context = self.get_context_data()
+        context["payment_form"] = payment_form
+
+        return self.render_to_response(context)
 
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
@@ -261,6 +221,11 @@ class PackageDetailView(LoginRequiredMixin, DetailView):
 
 
 # create a delete method that deletes the package after 7 days or moves to trash model
+
+
+# class PackageWalletDetail(LoginRequiredMixin, DetailView):
+#     model = PackageWallet
+#     template_name
 
 
 class DepositResultsView(CreateView):
